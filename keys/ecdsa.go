@@ -31,8 +31,8 @@ const (
 
 // NewECDSAKeyPair generates a new ECDSA key pair using the P-256 curve.
 func NewECDSAKeyPair() (crypto.PublicKey, *ecdsa.PrivateKey, error) {
-	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-	return priv.Public(), priv, nil
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	return priv.Public(), priv, err
 }
 
 // EncodeECDSASecretKey encodes an ECDSA secret key in ASN.1 DER format within a PEM block.

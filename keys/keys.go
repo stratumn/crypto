@@ -22,8 +22,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
-	"math/rand"
-	"time"
 
 	"github.com/pkg/errors"
 	"github.com/stratumn/crypto/encoding"
@@ -56,11 +54,6 @@ type publicKeyInfo struct {
 	Raw       asn1.RawContent
 	Algorithm pkix.AlgorithmIdentifier
 	PublicKey asn1.BitString
-}
-
-func init() {
-	seed := int64(time.Now().Nanosecond())
-	rand.Seed(seed)
 }
 
 // GenerateKey generates a key pair given public key algorithm.
@@ -175,7 +168,7 @@ func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
 }
 
 /*
- SECRET KEYS' ENCONDING FUNCTION.
+ SECRET KEYS' ENCODING FUNCTIONS.
 */
 
 // EncodeSecretkey serializes a secret key to the PEM format.

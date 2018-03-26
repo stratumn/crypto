@@ -3,3 +3,6 @@ dist
 *.test
 *.out
 coverage.txt
+coverhtml.txt
+*.DS_Store
+*.swp

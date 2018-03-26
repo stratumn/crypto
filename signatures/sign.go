@@ -63,7 +63,7 @@ func Sign(secretKey, msg []byte) (*Signature, error) {
 		ai = pkix.AlgorithmIdentifier{
 			Algorithm: OIDSignatureECDSAWithSHA256,
 		}
-		opts = crypto.Hash(0)
+		opts = crypto.SHA256
 	case *rsa.PrivateKey:
 		h := sha256.New()
 		h.Write(msg)
