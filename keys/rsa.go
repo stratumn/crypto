@@ -33,8 +33,8 @@ const (
 
 // NewRSAKeyPair generates a new RSA key pair.
 func NewRSAKeyPair() (crypto.PublicKey, *rsa.PrivateKey, error) {
-	priv, _ := rsa.GenerateKey(rand.Reader, RSAKeySize)
-	return priv.Public(), priv, nil
+	priv, err := rsa.GenerateKey(rand.Reader, RSAKeySize)
+	return priv.Public(), priv, err
 }
 
 // EncodeRSASecretKey encodes an RSA key in ASN.1 DER format within a PEM block.
