@@ -21,7 +21,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-// ErrBadPEMFormat is the error returned when a parsing error occurend when trying to decode a PEM block.
+// ErrBadPEMFormat is the error returned when a parsing error occured while trying to decode a PEM block.
 var ErrBadPEMFormat = errors.New("failed to decode PEM block")
 
 // EncodePEM serializes any data to the PEM format.
