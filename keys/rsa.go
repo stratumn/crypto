@@ -33,7 +33,10 @@ const (
 
 // NewRSAKeyPair generates a new RSA key pair.
 func NewRSAKeyPair() (crypto.PublicKey, *rsa.PrivateKey, error) {
-	priv, _ := rsa.GenerateKey(rand.Reader, RSAKeySize)
+	priv, err := rsa.GenerateKey(rand.Reader, RSAKeySize)
+	if err != nil {
+		return nil, nil, err
+	}
 	return priv.Public(), priv, nil
 }
 

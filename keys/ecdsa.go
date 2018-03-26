@@ -31,7 +31,10 @@ const (
 
 // NewECDSAKeyPair generates a new ECDSA key pair using the P-256 curve.
 func NewECDSAKeyPair() (crypto.PublicKey, *ecdsa.PrivateKey, error) {
-	priv, _ := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	if err != nil {
+		return nil, nil, err
+	}
 	return priv.Public(), priv, nil
 }
 
