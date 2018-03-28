@@ -25,7 +25,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
-	"github.com/stratumn/crypto/encoding"
+	"github.com/stratumn/go-crypto/encoding"
 
 	"golang.org/x/crypto/ed25519"
 )

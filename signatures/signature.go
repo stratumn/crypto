@@ -26,8 +26,8 @@ import (
 
 	"github.com/pkg/errors"
 
-	"github.com/stratumn/crypto/encoding"
-	"github.com/stratumn/crypto/keys"
+	"github.com/stratumn/go-crypto/encoding"
+	"github.com/stratumn/go-crypto/keys"
 )
 
 // List of signature algorithms supported in addition to x509.
