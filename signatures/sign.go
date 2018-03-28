@@ -47,9 +47,9 @@ func Sign(secretKey, msg []byte) (*Signature, error) {
 	var ai pkix.AlgorithmIdentifier
 	var opts crypto.SignerOpts
 	switch sk.(type) {
-	case ed25519.PrivateKey:
-		if len(sk.(ed25519.PrivateKey)) != ed25519.PrivateKeySize {
-			return nil, errors.Errorf("%s private key length must be %d, got %d", algoName[PureED25519], ed25519.PrivateKeySize, len(sk.(ed25519.PrivateKey)))
+	case *ed25519.PrivateKey:
+		if len(*sk.(*ed25519.PrivateKey)) != ed25519.PrivateKeySize {
+			return nil, errors.Errorf("%s private key length must be %d, got %d", algoName[PureED25519], ed25519.PrivateKeySize, len(*sk.(*ed25519.PrivateKey)))
 		}
 		signed = msg
 		ai = pkix.AlgorithmIdentifier{

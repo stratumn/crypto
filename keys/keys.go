@@ -67,7 +67,7 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 
 	switch algo {
 	case ED25519:
-		var priv ed25519.PrivateKey
+		var priv *ed25519.PrivateKey
 		pub, priv, err = NewEd25519KeyPair()
 		if err != nil {
 			return nil, nil, err
@@ -111,13 +111,13 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 
 // MarshalPKIXPublicKey wraps x509.MarshalPublicKey and additionaly handles ED25519 public keys.
 func MarshalPKIXPublicKey(pub crypto.PublicKey) ([]byte, error) {
-	if pk, ok := pub.(ed25519.PublicKey); ok {
+	if pk, ok := pub.(*ed25519.PublicKey); ok {
 		pkInfo := publicKeyInfo{
 			Algorithm: pkix.AlgorithmIdentifier{
 				Algorithm: OIDPublicKeyED25519,
 			},
 			PublicKey: asn1.BitString{
-				Bytes:     pk,
+				Bytes:     *pk,
 				BitLength: ed25519.PrivateKeySize * 8,
 			},
 		}
@@ -137,7 +137,7 @@ func EncodePublicKey(pub crypto.PublicKey) ([]byte, error) {
 
 	var pemLabel string
 	switch pub.(type) {
-	case ed25519.PublicKey:
+	case *ed25519.PublicKey:
 		pemLabel = ED25519PublicPEMLabel
 	case *ecdsa.PublicKey:
 		pemLabel = ECDSAPublicPEMLabel
@@ -164,8 +164,8 @@ func ParsePKIXPublicKey(pk []byte) (crypto.PublicKey, error) {
 		if len(pkInfo.PublicKey.Bytes) != ed25519.PublicKeySize {
 			return nil, errors.New("invalid Ed25519 public key")
 		}
-
-		return ed25519.PublicKey(pkInfo.PublicKey.Bytes), nil
+		pub := ed25519.PublicKey(pkInfo.PublicKey.Bytes)
+		return &pub, nil
 	}
 
 	return x509.ParsePKIXPublicKey(pk)
@@ -193,8 +193,8 @@ func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
 // EncodeSecretkey serializes a secret key to the PEM format.
 func EncodeSecretkey(priv crypto.PrivateKey) ([]byte, error) {
 	switch priv.(type) {
-	case ed25519.PrivateKey:
-		return EncodeED25519SecretKey(priv.(ed25519.PrivateKey))
+	case *ed25519.PrivateKey:
+		return EncodeED25519SecretKey(priv.(*ed25519.PrivateKey))
 	case *ecdsa.PrivateKey:
 		return EncodeECDSASecretKey(priv.(*ecdsa.PrivateKey))
 	case *rsa.PrivateKey:

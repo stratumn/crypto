@@ -32,17 +32,17 @@ const (
 )
 
 // NewEd25519KeyPair generates a new ed25519 key pair.
-func NewEd25519KeyPair() (crypto.PublicKey, ed25519.PrivateKey, error) {
+func NewEd25519KeyPair() (crypto.PublicKey, *ed25519.PrivateKey, error) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, nil, err
 	}
-	return pub, priv, nil
+	return &pub, &priv, nil
 }
 
 // EncodeED25519SecretKey encodes an ed25519 secret key using ASN.1
-func EncodeED25519SecretKey(sk ed25519.PrivateKey) ([]byte, error) {
-	skBytes, err := asn1.Marshal(sk)
+func EncodeED25519SecretKey(sk *ed25519.PrivateKey) ([]byte, error) {
+	skBytes, err := asn1.Marshal(*sk)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func EncodeED25519SecretKey(sk ed25519.PrivateKey) ([]byte, error) {
 }
 
 // ParseED25519Key decodes a PEM block containing an ASN1. DER encoded private key of type ED25519.
-func ParseED25519Key(sk []byte) (ed25519.PrivateKey, ed25519.PublicKey, error) {
+func ParseED25519Key(sk []byte) (*ed25519.PrivateKey, *ed25519.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, ED25519SecretPEMLabel)
 	if err != nil {
 		return nil, nil, err
@@ -62,5 +62,6 @@ func ParseED25519Key(sk []byte) (ed25519.PrivateKey, ed25519.PublicKey, error) {
 		return nil, nil, err
 	}
 
-	return data, data.Public().(ed25519.PublicKey), nil
+	pub := data.Public().(ed25519.PublicKey)
+	return &data, &pub, nil
 }

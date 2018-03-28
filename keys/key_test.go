@@ -53,8 +53,8 @@ func TestNew(t *testing.T) {
 	t.Run("ED25519", func(t *testing.T) {
 		pub, priv, err := NewEd25519KeyPair()
 		require.NoError(t, err)
-		assert.Len(t, pub, ed25519.PublicKeySize)
-		assert.Len(t, priv, ed25519.PrivateKeySize)
+		assert.Len(t, *pub.(*ed25519.PublicKey), ed25519.PublicKeySize)
+		assert.Len(t, *priv, ed25519.PrivateKeySize)
 	})
 }
 
@@ -216,7 +216,7 @@ func TestEncode(t *testing.T) {
 		require.NoError(t, err)
 
 		t.Run("Public key", func(t *testing.T) {
-			encoded, err := EncodePublicKey(pub)
+			encoded, err := EncodePublicKey(&pub)
 			require.NoError(t, err)
 
 			block, _ := pem.Decode(encoded)
@@ -231,7 +231,7 @@ func TestEncode(t *testing.T) {
 		})
 
 		t.Run("Secret key", func(t *testing.T) {
-			encoded, err := EncodeSecretkey(priv)
+			encoded, err := EncodeSecretkey(&priv)
 			require.NoError(t, err)
 
 			block, _ := pem.Decode(encoded)

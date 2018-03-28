@@ -47,8 +47,8 @@ func Verify(signature *Signature) error {
 	}
 
 	if ai == PureED25519 {
-		if pub, ok := pk.(ed25519.PublicKey); ok {
-			if ed25519.Verify(pub, signature.Message, sigBytes) {
+		if pub, ok := pk.(*ed25519.PublicKey); ok {
+			if ed25519.Verify(*pub, signature.Message, sigBytes) {
 				return nil
 			}
 			return errors.Wrap(ErrInvalidSignature, "invalid ed25519 signature")

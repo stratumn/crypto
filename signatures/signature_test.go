@@ -88,7 +88,7 @@ func TestSign(t *testing.T) {
 		_, sk, err := ed25519.GenerateKey(rand.Reader)
 		require.NoError(t, err)
 
-		encoded, err := keys.EncodeSecretkey(sk)
+		encoded, err := keys.EncodeSecretkey(&sk)
 		require.NoError(t, err)
 
 		sig, err := Sign(encoded, msg)
@@ -99,8 +99,8 @@ func TestSign(t *testing.T) {
 
 		DER, _ := pem.Decode(sig.Signature)
 
-		assert.True(t, ed25519.Verify(pub.(ed25519.PublicKey), sig.Message, DER.Bytes))
-		assert.False(t, ed25519.Verify(pub.(ed25519.PublicKey), otherMsg, DER.Bytes))
+		assert.True(t, ed25519.Verify(*pub.(*ed25519.PublicKey), sig.Message, DER.Bytes))
+		assert.False(t, ed25519.Verify(*pub.(*ed25519.PublicKey), otherMsg, DER.Bytes))
 	})
 	t.Run("Bad key", func(t *testing.T) {
 		_, err := Sign([]byte("test"), msg)
@@ -199,7 +199,7 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		signature := ed25519.Sign(sk, msg)
-		pkBytes, err := keys.EncodePublicKey(pk)
+		pkBytes, err := keys.EncodePublicKey(&pk)
 		require.NoError(t, err)
 
 		sigPEM, err := encoding.EncodePEM(signature, SignaturePEMLabel)
@@ -225,7 +225,7 @@ func TestVerify(t *testing.T) {
 
 	t.Run("Unsupported algorithm", func(t *testing.T) {
 		pk, _, err := ed25519.GenerateKey(rand.Reader)
-		pkBytes, err := keys.EncodePublicKey(pk)
+		pkBytes, err := keys.EncodePublicKey(&pk)
 		require.NoError(t, err)
 		sigPEM, err := encoding.EncodePEM([]byte("test"), SignaturePEMLabel)
 		require.NoError(t, err)
