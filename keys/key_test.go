@@ -24,6 +24,7 @@ import (
 	"encoding/asn1"
 	"encoding/pem"
 	"math/big"
+	"strings"
 	"testing"
 
 	"golang.org/x/crypto/ed25519"
@@ -154,7 +155,7 @@ func TestEncode(t *testing.T) {
 
 			block, _ := pem.Decode(encoded)
 			assert.NotNil(t, block)
-			assert.Equal(t, PublicKeyPEMLabel, block.Type)
+			assert.Equal(t, RSAPublicPEMLabel, block.Type)
 
 			decoded, err := x509.ParsePKIXPublicKey(block.Bytes)
 			assert.NoError(t, err)
@@ -187,7 +188,7 @@ func TestEncode(t *testing.T) {
 
 			block, _ := pem.Decode(encoded)
 			assert.NotNil(t, block)
-			assert.Equal(t, PublicKeyPEMLabel, block.Type)
+			assert.Equal(t, ECDSAPublicPEMLabel, block.Type)
 
 			decoded, err := x509.ParsePKIXPublicKey(block.Bytes)
 			assert.NoError(t, err)
@@ -220,7 +221,7 @@ func TestEncode(t *testing.T) {
 
 			block, _ := pem.Decode(encoded)
 			assert.NotNil(t, block)
-			assert.Equal(t, PublicKeyPEMLabel, block.Type)
+			assert.Equal(t, ED25519PublicPEMLabel, block.Type)
 
 			var parsedData publicKeyInfo
 			_, err = asn1.Unmarshal(block.Bytes, &parsedData)
@@ -321,9 +322,15 @@ func TestParse(t *testing.T) {
 	})
 
 	t.Run("Bad format", func(t *testing.T) {
-		t.Run("Public key", func(t *testing.T) {
+		t.Run("Not PEM", func(t *testing.T) {
 			_, err := ParsePublicKey([]byte("test"))
 			assert.EqualError(t, err, encoding.ErrBadPEMFormat.Error())
+		})
+		t.Run("Unhandled public key", func(t *testing.T) {
+			pub, _, _ := GenerateKey(ED25519)
+			unhandledPub := strings.Replace(string(pub), "ED25519", "UNKNOWN", 2)
+			_, err := ParsePublicKey([]byte(string(unhandledPub)))
+			assert.EqualError(t, err, "Could not parse public key, handled types are: ED25519 PUBLIC KEY, EC PUBLIC KEY, RSA PUBLIC KEY, PUBLIC KEY")
 		})
 		t.Run("Secret key", func(t *testing.T) {
 			_, _, err := ParseSecretKey([]byte("test"))

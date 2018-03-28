@@ -29,6 +29,9 @@ const (
 
 	// RSASecretPEMLabel is the label of a PEM-encoded RSA secret key.
 	RSASecretPEMLabel = "RSA PRIVATE KEY"
+
+	// RSAPublicPEMLabel is the label of a PEM-encoded RSA public key.
+	RSAPublicPEMLabel = "RSA PUBLIC KEY"
 )
 
 // NewRSAKeyPair generates a new RSA key pair.

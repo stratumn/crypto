@@ -22,6 +22,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"encoding/pem"
+	"strings"
 
 	"github.com/pkg/errors"
 	"github.com/stratumn/crypto/encoding"
@@ -30,8 +31,8 @@ import (
 )
 
 const (
-	// PublicKeyPEMLabel is the label on top of a public key PEM block
-	PublicKeyPEMLabel = "BEGIN PUBLIC KEY"
+	// GenericPublicPEMLabel is the label of the PEM key in case the key algoritm is not identified.
+	GenericPublicPEMLabel = "PUBLIC KEY"
 
 	// ED25519 is a public key algorithm currently not supported in x509
 	ED25519 x509.PublicKeyAlgorithm = iota + 1000
@@ -40,6 +41,9 @@ const (
 var (
 	// ErrNotImplemented is the error returned if the key algorithm is not implemented.
 	ErrNotImplemented = errors.New("key algorithm not implemented")
+
+	// HandledPublicKeys are the public keys which we are able to parse
+	HandledPublicKeys = []string{ED25519PublicPEMLabel, ECDSAPublicPEMLabel, RSAPublicPEMLabel, GenericPublicPEMLabel}
 )
 
 // List of object identifiers for public keys.
@@ -130,7 +134,19 @@ func EncodePublicKey(pub crypto.PublicKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return encoding.EncodePEM(DERBytes, PublicKeyPEMLabel)
+
+	var pemLabel string
+	switch pub.(type) {
+	case ed25519.PublicKey:
+		pemLabel = ED25519PublicPEMLabel
+	case *ecdsa.PublicKey:
+		pemLabel = ECDSAPublicPEMLabel
+	case *rsa.PublicKey:
+		pemLabel = RSAPublicPEMLabel
+	default:
+		pemLabel = GenericPublicPEMLabel
+	}
+	return encoding.EncodePEM(DERBytes, pemLabel)
 }
 
 // ParsePKIXPublicKey parses a DER encoded public key.
@@ -159,12 +175,15 @@ func ParsePKIXPublicKey(pk []byte) (crypto.PublicKey, error) {
 // If of type ED25519 it parses the public key directly,
 // if not it relies on x509 public key parser.
 func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
-	DERBytes, err := encoding.DecodePEM(pk, PublicKeyPEMLabel)
-	if err != nil {
-		return nil, err
+	for _, keyType := range HandledPublicKeys {
+		DERBytes, err := encoding.DecodePEM(pk, keyType)
+		if err == encoding.ErrBadPEMFormat {
+			return nil, err
+		} else if err == nil {
+			return ParsePKIXPublicKey(DERBytes)
+		}
 	}
-
-	return ParsePKIXPublicKey(DERBytes)
+	return nil, errors.Errorf("Could not parse public key, handled types are: %v", strings.Join(HandledPublicKeys, ", "))
 }
 
 /*

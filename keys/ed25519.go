@@ -26,6 +26,9 @@ import (
 const (
 	// ED25519SecretPEMLabel is the label of a PEM-encoded ED25519 secret key.
 	ED25519SecretPEMLabel = "ED25519 PRIVATE KEY"
+
+	// ED25519PublicPEMLabel is the label of a PEM-encoded ED25519 public key.
+	ED25519PublicPEMLabel = "ED25519 PUBLIC KEY"
 )
 
 // NewEd25519KeyPair generates a new ed25519 key pair.

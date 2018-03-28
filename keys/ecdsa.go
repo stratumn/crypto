@@ -27,6 +27,9 @@ import (
 const (
 	// ECDSASecretPEMLabel is the label of a PEM-encoded ECDSA secret key.
 	ECDSASecretPEMLabel = "EC PRIVATE KEY"
+
+	// ECDSAPublicPEMLabel is the label of a PEM-encoded ECDSA public key.
+	ECDSAPublicPEMLabel = "EC PUBLIC KEY"
 )
 
 // NewECDSAKeyPair generates a new ECDSA key pair using the P-256 curve.
