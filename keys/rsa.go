@@ -20,7 +20,7 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 
-	"github.com/stratumn/crypto/encoding"
+	"github.com/stratumn/go-crypto/encoding"
 )
 
 const (

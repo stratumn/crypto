@@ -27,8 +27,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stratumn/crypto/encoding"
-	"github.com/stratumn/crypto/keys"
+	"github.com/stratumn/go-crypto/encoding"
+	"github.com/stratumn/go-crypto/keys"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ed25519"

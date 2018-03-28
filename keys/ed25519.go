@@ -19,7 +19,7 @@ import (
 	"crypto/rand"
 	"encoding/asn1"
 
-	"github.com/stratumn/crypto/encoding"
+	"github.com/stratumn/go-crypto/encoding"
 	"golang.org/x/crypto/ed25519"
 )
 

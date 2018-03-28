@@ -29,7 +29,7 @@ import (
 
 	"golang.org/x/crypto/ed25519"
 
-	"github.com/stratumn/crypto/encoding"
+	"github.com/stratumn/go-crypto/encoding"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

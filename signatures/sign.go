@@ -23,8 +23,8 @@ import (
 	"crypto/x509/pkix"
 
 	"github.com/pkg/errors"
-	"github.com/stratumn/crypto/encoding"
-	"github.com/stratumn/crypto/keys"
+	"github.com/stratumn/go-crypto/encoding"
+	"github.com/stratumn/go-crypto/keys"
 	"golang.org/x/crypto/ed25519"
 )
 
