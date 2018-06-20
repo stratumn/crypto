@@ -241,3 +241,29 @@ func TestVerify(t *testing.T) {
 
 	})
 }
+
+func TestEncode(t *testing.T) {
+	pk, _, err := ed25519.GenerateKey(rand.Reader)
+	pkBytes, err := keys.EncodePublicKey(&pk)
+	require.NoError(t, err)
+	sigPEM, err := encoding.EncodePEM([]byte("test"), SignaturePEMLabel)
+	require.NoError(t, err)
+
+	sig := &Signature{
+		AI:        "test",
+		Message:   otherMsg,
+		PublicKey: pkBytes,
+		Signature: sigPEM,
+	}
+
+	b, err := sig.Encode()
+	require.NoError(t, err)
+
+	parsed, err := ParseSignature(b)
+	require.NoError(t, err)
+
+	assert.Equal(t, sig.AI, parsed.AI)
+	assert.Equal(t, sig.Message, parsed.Message)
+	assert.Equal(t, sig.PublicKey, parsed.PublicKey)
+	assert.Equal(t, sig.Signature, parsed.Signature)
+}

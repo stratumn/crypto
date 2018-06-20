@@ -23,6 +23,7 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/json"
 
 	"github.com/pkg/errors"
 
@@ -55,13 +56,13 @@ type Signature struct {
 
 // ParseSignature deserializes a signature from a PEM format.
 func ParseSignature(sigBytes []byte) (*Signature, error) {
-	DERBytes, err := encoding.DecodePEM(sigBytes, SignaturePEMLabel)
+	jsonSig, err := encoding.DecodePEM(sigBytes, SignaturePEMLabel)
 	if err != nil {
 		return nil, err
 	}
 
 	var sig Signature
-	if _, err := asn1.Unmarshal(DERBytes, &sig); err != nil {
+	if err := json.Unmarshal(jsonSig, &sig); err != nil {
 		return nil, err
 	}
 	return &sig, nil
@@ -69,7 +70,7 @@ func ParseSignature(sigBytes []byte) (*Signature, error) {
 
 // Encode serializes a signature to the PEM format.
 func (s *Signature) Encode() ([]byte, error) {
-	sigBytes, err := asn1.Marshal(s)
+	sigBytes, err := json.Marshal(s)
 	if err != nil {
 		return nil, err
 	}
