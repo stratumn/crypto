@@ -17,8 +17,12 @@ GITHUB_RELEASE_COMMAND=github-release
 GITHUB_RELEASE_FLAGS=--user '$(GITHUB_USER)' --repo '$(GITHUB_REPO)' --tag '$(GIT_TAG)'
 GITHUB_RELEASE_RELEASE_FLAGS=$(GITHUB_RELEASE_FLAGS) --name '$(RELEASE_NAME)' --description "$$(cat $(RELEASE_NOTES_FILE))"
 
+PROTOS=$(shell find signatures -name '*.proto')
+PROTOS_GO=$(PROTOS:.proto=.pb.go)
+
 GO_LIST=$(GO_CMD) list
 GO_TEST=$(GO_CMD) test
+GO_GET=$(GO_CMD) get
 GO_LINT=$(GO_LINT_CMD) -set_exit_status
 GITHUB_RELEASE_RELEASE=$(GITHUB_RELEASE_COMMAND) release $(GITHUB_RELEASE_RELEASE_FLAGS)
 GITHUB_RELEASE_EDIT=$(GITHUB_RELEASE_COMMAND) edit $(GITHUB_RELEASE_RELEASE_FLAGS)
@@ -34,14 +38,27 @@ LINT_LIST=$(foreach package, $(PACKAGES), lint_$(package))
 CLEAN_LIST=$(foreach path, $(CLEAN_PATHS), clean_$(path))
 
 # == .PHONY ===================================================================
-.PHONY: test coverage lint build git_tag github_draft github_publish clean test_headers $(TEST_LIST) $(LINT_LIST) $(CLEAN_LIST)
+.PHONY: protobuf test coverage lint build git_tag github_draft github_publish clean test_headers $(TEST_LIST) $(LINT_LIST) $(CLEAN_LIST)
 
 # == all ======================================================================
-all: lint test
+all: protobuf lint test
 
 # == release ==================================================================
-release: test lint clean build git_tag github_draft github_upload github_publish
+release: protobuf test lint clean build git_tag github_draft github_upload github_publish
 
+# == protobuf =================================================================
+protobuf: protodeps $(PROTOS_GO)
+
+protodeps:
+	$(GO_GET) -u github.com/gogo/protobuf/protoc-gen-gofast
+
+%.pb.go: %.proto
+		protoc \
+			-I $(GOPATH)/src/github.com/gogo/protobuf/protobuf \
+			-I $(GOPATH)/src/ \
+			--gofast_out=\
+:$(GOPATH)/src \
+			github.com/$(GITHUB_USER)/$(GITHUB_REPO)/$<; \
 # == test =====================================================================
 test: $(TEST_LIST)
 
