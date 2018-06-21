@@ -50,7 +50,7 @@ var ErrNotImplemented = errors.New("Unhandled signature algorithm")
 type Signature struct {
 	AI        string `json:"algorithm"`
 	PublicKey []byte `json:"public_key"`
-	Message   []byte `json:"messsage"`
+	Message   []byte `json:"message"`
 	Signature []byte `json:"signature"`
 }
 
