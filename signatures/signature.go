@@ -39,20 +39,8 @@ const (
 	SignaturePEMLabel = "MESSAGE"
 )
 
-// ErrNotImplemented is the error returned when trying to sign a message wit an uninmplemented algorithm.
+// ErrNotImplemented is the error returned when trying to sign a message with an unimplemented algorithm.
 var ErrNotImplemented = errors.New("Unhandled signature algorithm")
-
-// Signature describes a signed message. It contains:
-// - the digital signature algorithm used to sign the message
-// - the publicKey of the signer
-// - the original message
-// - the signature. Depending on the algorithm, either the whole message or just a hash of it is signed.
-type Signature struct {
-	AI        string `json:"algorithm"`
-	PublicKey []byte `json:"public_key"`
-	Message   []byte `json:"message"`
-	Signature []byte `json:"signature"`
-}
 
 // ParseSignature deserializes a signature from a PEM format.
 func ParseSignature(sigBytes []byte) (*Signature, error) {
