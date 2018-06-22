@@ -43,7 +43,7 @@ const (
 var ErrNotImplemented = errors.New("Unhandled signature algorithm")
 
 // ParseSignature deserializes a signature from a PEM format.
-func ParseSignature(sigBytes []byte) (*Signature, error) {
+func ParseSignature(sigBytes string) (*Signature, error) {
 	jsonSig, err := encoding.DecodePEM(sigBytes, SignaturePEMLabel)
 	if err != nil {
 		return nil, err
@@ -57,10 +57,10 @@ func ParseSignature(sigBytes []byte) (*Signature, error) {
 }
 
 // Encode serializes a signature to the PEM format.
-func (s *Signature) Encode() ([]byte, error) {
+func (s *Signature) Encode() (string, error) {
 	sigBytes, err := json.Marshal(s)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return encoding.EncodePEM(sigBytes, SignaturePEMLabel)
 }

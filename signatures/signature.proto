@@ -27,7 +27,7 @@ option go_package = "github.com/stratumn/go-crypto/signatures;signatures";
 // - the signature. Depending on the algorithm, either the whole message or just a hash of it is signed.
 message Signature {
     string AI = 1 [(gogoproto.jsontag) = "algorithm"];
-    bytes publicKey = 2 [(gogoproto.jsontag) = "public_key"];
-    bytes signature = 3;
+    string publicKey = 2 [(gogoproto.jsontag) = "public_key"];
+    string signature = 3;
     bytes message = 4;
 }

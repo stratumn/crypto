@@ -62,7 +62,7 @@ type publicKeyInfo struct {
 
 // GenerateKey generates a key pair given public key algorithm.
 // Available algorithms are: RSA, ECDSA256, RSA.
-func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byte, err error) {
+func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes string, privBytes string, err error) {
 	var pub crypto.PublicKey
 
 	switch algo {
@@ -70,7 +70,7 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 		var priv *ed25519.PrivateKey
 		pub, priv, err = NewEd25519KeyPair()
 		if err != nil {
-			return nil, nil, err
+			return "", "", err
 		}
 		privBytes, err = EncodeED25519SecretKey(priv)
 
@@ -78,7 +78,7 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 		var priv *ecdsa.PrivateKey
 		pub, priv, err = NewECDSAKeyPair()
 		if err != nil {
-			return nil, nil, err
+			return "", "", err
 		}
 		privBytes, err = EncodeECDSASecretKey(priv)
 
@@ -86,7 +86,7 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 		var priv *rsa.PrivateKey
 		pub, priv, err = NewRSAKeyPair()
 		if err != nil {
-			return nil, nil, err
+			return "", "", err
 		}
 		privBytes, err = EncodeRSASecretKey(priv)
 	default:
@@ -94,12 +94,12 @@ func GenerateKey(algo x509.PublicKeyAlgorithm) (pubBytes []byte, privBytes []byt
 	}
 
 	if err != nil {
-		return nil, nil, err
+		return "", "", err
 	}
 
 	pubBytes, err = EncodePublicKey(pub)
 	if err != nil {
-		return nil, nil, err
+		return "", "", err
 	}
 
 	return pubBytes, privBytes, nil
@@ -129,10 +129,10 @@ func MarshalPKIXPublicKey(pub crypto.PublicKey) ([]byte, error) {
 }
 
 // EncodePublicKey serializes a public key to the PEM format.
-func EncodePublicKey(pub crypto.PublicKey) ([]byte, error) {
+func EncodePublicKey(pub crypto.PublicKey) (string, error) {
 	DERBytes, err := MarshalPKIXPublicKey(pub)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 
 	var pemLabel string
@@ -174,7 +174,7 @@ func ParsePKIXPublicKey(pk []byte) (crypto.PublicKey, error) {
 // ParsePublicKey parses a PEM encoded public Key
 // If of type ED25519 it parses the public key directly,
 // if not it relies on x509 public key parser.
-func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
+func ParsePublicKey(pk string) (crypto.PublicKey, error) {
 	for _, keyType := range HandledPublicKeys {
 		DERBytes, err := encoding.DecodePEM(pk, keyType)
 		if err == encoding.ErrBadPEMFormat {
@@ -191,7 +191,7 @@ func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
 */
 
 // EncodeSecretkey serializes a secret key to the PEM format.
-func EncodeSecretkey(priv crypto.PrivateKey) ([]byte, error) {
+func EncodeSecretkey(priv crypto.PrivateKey) (string, error) {
 	switch priv.(type) {
 	case *ed25519.PrivateKey:
 		return EncodeED25519SecretKey(priv.(*ed25519.PrivateKey))
@@ -200,13 +200,13 @@ func EncodeSecretkey(priv crypto.PrivateKey) ([]byte, error) {
 	case *rsa.PrivateKey:
 		return EncodeRSASecretKey(priv.(*rsa.PrivateKey))
 	default:
-		return nil, ErrNotImplemented
+		return "", ErrNotImplemented
 	}
 }
 
 // ParseSecretKey deserializes a secret key from a PEM format.
-func ParseSecretKey(sk []byte) (priv crypto.PrivateKey, pub crypto.PublicKey, err error) {
-	block, _ := pem.Decode(sk)
+func ParseSecretKey(sk string) (priv crypto.PrivateKey, pub crypto.PublicKey, err error) {
+	block, _ := pem.Decode([]byte(sk))
 	if block == nil {
 		return nil, nil, encoding.ErrBadPEMFormat
 	}
