@@ -39,7 +39,7 @@ const (
 	SignaturePEMLabel = "MESSAGE"
 )
 
-// ErrNotImplemented is the error returned when trying to sign a message wit an uninmplemented algorithm.
+// ErrNotImplemented is the error returned when trying to sign a message with an unimplemented algorithm.
 var ErrNotImplemented = errors.New("Unhandled signature algorithm")
 
 // ParseSignature deserializes a signature from a PEM format.

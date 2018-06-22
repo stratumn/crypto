@@ -14,7 +14,7 @@
 
 syntax = "proto3";
 
-package stratumn.crypto.signature;
+package stratumn.crypto.signatures;
 
 import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 
