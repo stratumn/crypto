@@ -42,16 +42,16 @@ func NewECDSAKeyPair() (crypto.PublicKey, *ecdsa.PrivateKey, error) {
 }
 
 // EncodeECDSASecretKey encodes an ECDSA secret key in ASN.1 DER format within a PEM block.
-func EncodeECDSASecretKey(sk *ecdsa.PrivateKey) ([]byte, error) {
+func EncodeECDSASecretKey(sk *ecdsa.PrivateKey) (string, error) {
 	skBytes, err := x509.MarshalECPrivateKey(sk)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return encoding.EncodePEM(skBytes, ECDSASecretPEMLabel)
 }
 
 // ParseECDSAKey decodes a PEM block containing an ASN1. DER encoded secret key of type ECDSA.
-func ParseECDSAKey(sk []byte) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
+func ParseECDSAKey(sk string) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, ECDSASecretPEMLabel)
 	if err != nil {
 		return nil, nil, err

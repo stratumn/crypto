@@ -44,13 +44,13 @@ func NewRSAKeyPair() (crypto.PublicKey, *rsa.PrivateKey, error) {
 }
 
 // EncodeRSASecretKey encodes an RSA key in ASN.1 DER format within a PEM block.
-func EncodeRSASecretKey(sk *rsa.PrivateKey) ([]byte, error) {
+func EncodeRSASecretKey(sk *rsa.PrivateKey) (string, error) {
 	skBytes := x509.MarshalPKCS1PrivateKey(sk)
 	return encoding.EncodePEM(skBytes, RSASecretPEMLabel)
 }
 
 // ParseRSAKey decodes a PEM block containing an ASN1. DER encoded private key of type RSA.
-func ParseRSAKey(sk []byte) (*rsa.PrivateKey, *rsa.PublicKey, error) {
+func ParseRSAKey(sk string) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, RSASecretPEMLabel)
 	if err != nil {
 		return nil, nil, err

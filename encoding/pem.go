@@ -25,18 +25,18 @@ import (
 var ErrBadPEMFormat = errors.New("failed to decode PEM block")
 
 // EncodePEM serializes any data to the PEM format.
-func EncodePEM(val []byte, label string) ([]byte, error) {
+func EncodePEM(val []byte, label string) (string, error) {
 	var b bytes.Buffer
 	if err := pem.Encode(&b, &pem.Block{Type: label, Bytes: val}); err != nil {
-		return nil, err
+		return "", err
 	}
 
-	return b.Bytes(), nil
+	return b.String(), nil
 }
 
 // DecodePEM deserializes a PEM block and returns the bytes contained in it.
-func DecodePEM(data []byte, label string) ([]byte, error) {
-	block, _ := pem.Decode(data)
+func DecodePEM(data string, label string) ([]byte, error) {
+	block, _ := pem.Decode([]byte(data))
 	if block == nil {
 		return nil, ErrBadPEMFormat
 	}

@@ -34,7 +34,7 @@ func TestEncodePEM(t *testing.T) {
 		data, err := EncodePEM(test, label)
 		require.NoError(t, err)
 
-		block, _ := pem.Decode(data)
+		block, _ := pem.Decode([]byte(data))
 		assert.Equal(t, block.Bytes, test)
 		assert.Equal(t, block.Type, label)
 	})
@@ -42,7 +42,7 @@ func TestEncodePEM(t *testing.T) {
 	t.Run("Handles null input", func(t *testing.T) {
 		data, err := EncodePEM(nil, label)
 		require.NoError(t, err)
-		block, _ := pem.Decode(data)
+		block, _ := pem.Decode([]byte(data))
 		assert.Equal(t, block.Type, label)
 	})
 }
@@ -56,7 +56,7 @@ func TestDecodePEM(t *testing.T) {
 		var b bytes.Buffer
 		pem.Encode(&b, &pem.Block{Type: label, Bytes: test})
 
-		decoded, err := DecodePEM(b.Bytes(), label)
+		decoded, err := DecodePEM(b.String(), label)
 		require.NoError(t, err)
 		assert.Equal(t, decoded, test)
 	})
@@ -65,7 +65,7 @@ func TestDecodePEM(t *testing.T) {
 		var b bytes.Buffer
 		pem.Encode(&b, &pem.Block{Type: label, Bytes: test})
 
-		_, err := DecodePEM(b.Bytes(), "other")
+		_, err := DecodePEM(b.String(), "other")
 		require.EqualError(t, err, "Wrong PEM block type: want other, got label")
 	})
 }

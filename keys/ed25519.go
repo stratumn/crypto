@@ -41,16 +41,16 @@ func NewEd25519KeyPair() (crypto.PublicKey, *ed25519.PrivateKey, error) {
 }
 
 // EncodeED25519SecretKey encodes an ed25519 secret key using ASN.1
-func EncodeED25519SecretKey(sk *ed25519.PrivateKey) ([]byte, error) {
+func EncodeED25519SecretKey(sk *ed25519.PrivateKey) (string, error) {
 	skBytes, err := asn1.Marshal(*sk)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	return encoding.EncodePEM(skBytes, ED25519SecretPEMLabel)
 }
 
 // ParseED25519Key decodes a PEM block containing an ASN1. DER encoded private key of type ED25519.
-func ParseED25519Key(sk []byte) (*ed25519.PrivateKey, *ed25519.PublicKey, error) {
+func ParseED25519Key(sk string) (*ed25519.PrivateKey, *ed25519.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, ED25519SecretPEMLabel)
 	if err != nil {
 		return nil, nil, err

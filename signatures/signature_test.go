@@ -56,7 +56,7 @@ func TestSign(t *testing.T) {
 		h.Write(msg)
 		d := h.Sum(nil)
 
-		DER, _ := pem.Decode(sig.Signature)
+		DER, _ := pem.Decode([]byte(sig.Signature))
 
 		assert.NoError(t, rsa.VerifyPKCS1v15(pub.(*rsa.PublicKey), crypto.SHA256, d, DER.Bytes))
 		assert.Error(t, rsa.VerifyPKCS1v15(pub.(*rsa.PublicKey), crypto.SHA256, otherMsg, DER.Bytes))
@@ -77,7 +77,7 @@ func TestSign(t *testing.T) {
 		h.Write(msg)
 		d := h.Sum(nil)
 
-		DER, _ := pem.Decode(sig.Signature)
+		DER, _ := pem.Decode([]byte(sig.Signature))
 		var ecdsaSignature struct{ R, S *big.Int }
 		_, err = asn1.Unmarshal(DER.Bytes, &ecdsaSignature)
 		require.NoError(t, err)
@@ -97,13 +97,13 @@ func TestSign(t *testing.T) {
 		pub, err := keys.ParsePublicKey(sig.PublicKey)
 		require.NoError(t, err)
 
-		DER, _ := pem.Decode(sig.Signature)
+		DER, _ := pem.Decode([]byte(sig.Signature))
 
 		assert.True(t, ed25519.Verify(*pub.(*ed25519.PublicKey), sig.Message, DER.Bytes))
 		assert.False(t, ed25519.Verify(*pub.(*ed25519.PublicKey), otherMsg, DER.Bytes))
 	})
 	t.Run("Bad key", func(t *testing.T) {
-		_, err := Sign([]byte("test"), msg)
+		_, err := Sign("test", msg)
 		require.EqualError(t, err, "failed to decode PEM block")
 	})
 }

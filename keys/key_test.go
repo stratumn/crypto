@@ -63,12 +63,12 @@ func TestGenerate(t *testing.T) {
 		pub, priv, err := GenerateKey(x509.RSA)
 		require.NoError(t, err)
 
-		blockPub, _ := pem.Decode(pub)
+		blockPub, _ := pem.Decode([]byte(pub))
 		require.NotNil(t, blockPub)
 		parsedPub, err := x509.ParsePKIXPublicKey(blockPub.Bytes)
 		require.NoError(t, err)
 
-		blockPriv, _ := pem.Decode(priv)
+		blockPriv, _ := pem.Decode([]byte(priv))
 		require.NotNil(t, blockPriv)
 		parsedPriv, err := x509.ParsePKCS1PrivateKey(blockPriv.Bytes)
 		require.NoError(t, err)
@@ -87,12 +87,12 @@ func TestGenerate(t *testing.T) {
 		pub, priv, err := GenerateKey(x509.ECDSA)
 		require.NoError(t, err)
 
-		blockPub, _ := pem.Decode(pub)
+		blockPub, _ := pem.Decode([]byte(pub))
 		require.NotNil(t, blockPub)
 		parsedPub, err := x509.ParsePKIXPublicKey(blockPub.Bytes)
 		require.NoError(t, err)
 
-		blockPriv, _ := pem.Decode(priv)
+		blockPriv, _ := pem.Decode([]byte(priv))
 		require.NotNil(t, blockPriv)
 		parsedPriv, err := x509.ParseECPrivateKey(blockPriv.Bytes)
 		require.NoError(t, err)
@@ -116,14 +116,14 @@ func TestGenerate(t *testing.T) {
 		pub, priv, err := GenerateKey(ED25519)
 		require.NoError(t, err)
 
-		blockPub, _ := pem.Decode(pub)
+		blockPub, _ := pem.Decode([]byte(pub))
 		require.NotNil(t, blockPub)
 		var parsedData publicKeyInfo
 		_, err = asn1.Unmarshal(blockPub.Bytes, &parsedData)
 		require.NoError(t, err)
 		parsedPub := ed25519.PublicKey(parsedData.PublicKey.Bytes)
 
-		blockPriv, _ := pem.Decode(priv)
+		blockPriv, _ := pem.Decode([]byte(priv))
 		require.NotNil(t, blockPriv)
 		var parsedPriv ed25519.PrivateKey
 		_, err = asn1.Unmarshal(blockPriv.Bytes, &parsedPriv)
@@ -153,7 +153,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodePublicKey(pub)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, RSAPublicPEMLabel, block.Type)
 
@@ -166,7 +166,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodeSecretkey(priv)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, RSASecretPEMLabel, block.Type)
 
@@ -186,7 +186,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodePublicKey(pub)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, ECDSAPublicPEMLabel, block.Type)
 
@@ -199,7 +199,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodeSecretkey(priv)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, ECDSASecretPEMLabel, block.Type)
 
@@ -219,7 +219,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodePublicKey(&pub)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, ED25519PublicPEMLabel, block.Type)
 
@@ -234,7 +234,7 @@ func TestEncode(t *testing.T) {
 			encoded, err := EncodeSecretkey(&priv)
 			require.NoError(t, err)
 
-			block, _ := pem.Decode(encoded)
+			block, _ := pem.Decode([]byte(encoded))
 			assert.NotNil(t, block)
 			assert.Equal(t, ED25519SecretPEMLabel, block.Type)
 
@@ -323,17 +323,17 @@ func TestParse(t *testing.T) {
 
 	t.Run("Bad format", func(t *testing.T) {
 		t.Run("Not PEM", func(t *testing.T) {
-			_, err := ParsePublicKey([]byte("test"))
+			_, err := ParsePublicKey("test")
 			assert.EqualError(t, err, encoding.ErrBadPEMFormat.Error())
 		})
 		t.Run("Unhandled public key", func(t *testing.T) {
 			pub, _, _ := GenerateKey(ED25519)
 			unhandledPub := strings.Replace(string(pub), "ED25519", "UNKNOWN", 2)
-			_, err := ParsePublicKey([]byte(string(unhandledPub)))
+			_, err := ParsePublicKey(unhandledPub)
 			assert.EqualError(t, err, "Could not parse public key, handled types are: ED25519 PUBLIC KEY, EC PUBLIC KEY, RSA PUBLIC KEY, PUBLIC KEY")
 		})
 		t.Run("Secret key", func(t *testing.T) {
-			_, _, err := ParseSecretKey([]byte("test"))
+			_, _, err := ParseSecretKey("test")
 			assert.EqualError(t, err, encoding.ErrBadPEMFormat.Error())
 		})
 	})

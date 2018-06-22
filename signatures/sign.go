@@ -32,7 +32,7 @@ import (
 // It returns a Signature object containing the public key, the identifier for the signature algorithm used,
 // the message that was signed and the signature.
 // The secretKey argument must be the content of a PEM file containing the secret key.
-func Sign(secretKey, msg []byte) (*Signature, error) {
+func Sign(secretKey string, msg []byte) (*Signature, error) {
 	sk, pk, err := keys.ParseSecretKey(secretKey)
 	if err != nil {
 		return nil, err
