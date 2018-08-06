@@ -21,6 +21,7 @@ import (
 	"crypto/rand"
 	"crypto/x509"
 
+	"github.com/pkg/errors"
 	"github.com/stratumn/go-crypto/encoding"
 )
 
@@ -41,26 +42,33 @@ func NewECDSAKeyPair() (crypto.PublicKey, *ecdsa.PrivateKey, error) {
 	return priv.Public(), priv, nil
 }
 
-// EncodeECDSASecretKey encodes an ECDSA secret key in ASN.1 DER format within a PEM block.
+// EncodeECDSASecretKey encodes an ECDSA secret key in ASN.1 DER format within a PEM block
+// embedded in PKCS#8.
 func EncodeECDSASecretKey(sk *ecdsa.PrivateKey) ([]byte, error) {
-	skBytes, err := x509.MarshalECPrivateKey(sk)
+	skBytes, err := x509.MarshalPKCS8PrivateKey(sk)
 	if err != nil {
 		return nil, err
 	}
 	return encoding.EncodePEM(skBytes, ECDSASecretPEMLabel)
 }
 
-// ParseECDSAKey decodes a PEM block containing an ASN1. DER encoded secret key of type ECDSA.
-func ParseECDSAKey(sk []byte) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
+// ParseECDSAPKCS8Key decodes a PEM block containing an ASN1. DER encoded
+// secret key of type ECDSA embedded in PKCS#8.
+func ParseECDSAPKCS8Key(sk []byte) (*ecdsa.PrivateKey, *ecdsa.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, ECDSASecretPEMLabel)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	data, err := x509.ParseECPrivateKey(DERBytes)
+	data, err := x509.ParsePKCS8PrivateKey(DERBytes)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return data, data.Public().(*ecdsa.PublicKey), nil
+	key, ok := data.(*ecdsa.PrivateKey)
+	if !ok {
+		return nil, nil, errors.New("failed to parse ECDSA private key embedded in PKCS#8")
+	}
+
+	return key, key.Public().(*ecdsa.PublicKey), nil
 }

@@ -17,6 +17,7 @@ package keys
 import (
 	"crypto"
 	"crypto/rand"
+	"crypto/x509/pkix"
 	"encoding/asn1"
 
 	"github.com/stratumn/go-crypto/encoding"
@@ -46,18 +47,23 @@ func EncodeED25519SecretKey(sk *ed25519.PrivateKey) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return encoding.EncodePEM(skBytes, ED25519SecretPEMLabel)
-}
 
-// ParseED25519Key decodes a PEM block containing an ASN1. DER encoded private key of type ED25519.
-func ParseED25519Key(sk []byte) (*ed25519.PrivateKey, *ed25519.PublicKey, error) {
-	DERBytes, err := encoding.DecodePEM(sk, ED25519SecretPEMLabel)
+	privKeyInfo := pkcs8PrivateKey{
+		Algo:       pkix.AlgorithmIdentifier{Algorithm: OIDPublicKeyED25519},
+		PrivateKey: skBytes,
+	}
+	privKey, err := asn1.Marshal(privKeyInfo)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
+	return encoding.EncodePEM(privKey, ED25519SecretPEMLabel)
+}
+
+// UnmarshalED25519Key unmarshals an ASN1. DER encoded private key of type ED25519.
+func UnmarshalED25519Key(sk []byte) (*ed25519.PrivateKey, *ed25519.PublicKey, error) {
 	var data ed25519.PrivateKey
-	_, err = asn1.Unmarshal(DERBytes, &data)
+	_, err := asn1.Unmarshal(sk, &data)
 	if err != nil {
 		return nil, nil, err
 	}
