@@ -70,8 +70,11 @@ func TestGenerate(t *testing.T) {
 
 		blockPriv, _ := pem.Decode(priv)
 		require.NotNil(t, blockPriv)
-		parsedPriv, err := x509.ParsePKCS1PrivateKey(blockPriv.Bytes)
+		parsedPrivInterface, err := x509.ParsePKCS8PrivateKey(blockPriv.Bytes)
 		require.NoError(t, err)
+
+		parsedPriv, ok := parsedPrivInterface.(*rsa.PrivateKey)
+		assert.True(t, ok)
 
 		h := sha256.New()
 		h.Write(message)
@@ -94,8 +97,12 @@ func TestGenerate(t *testing.T) {
 
 		blockPriv, _ := pem.Decode(priv)
 		require.NotNil(t, blockPriv)
-		parsedPriv, err := x509.ParseECPrivateKey(blockPriv.Bytes)
+
+		parsedPrivInterface, err := x509.ParsePKCS8PrivateKey(blockPriv.Bytes)
 		require.NoError(t, err)
+
+		parsedPriv, ok := parsedPrivInterface.(*ecdsa.PrivateKey)
+		assert.True(t, ok)
 
 		h := sha256.New()
 		h.Write(message)
@@ -125,8 +132,13 @@ func TestGenerate(t *testing.T) {
 
 		blockPriv, _ := pem.Decode(priv)
 		require.NotNil(t, blockPriv)
+
+		var parsedPrivInfo pkcs8PrivateKey
+		_, err = asn1.Unmarshal(blockPriv.Bytes, &parsedPrivInfo)
+		require.NoError(t, err)
+
 		var parsedPriv ed25519.PrivateKey
-		_, err = asn1.Unmarshal(blockPriv.Bytes, &parsedPriv)
+		_, err = asn1.Unmarshal(parsedPrivInfo.PrivateKey, &parsedPriv)
 		require.NoError(t, err)
 
 		sig, err := parsedPriv.Sign(rand.Reader, message, crypto.Hash(0))
@@ -170,7 +182,7 @@ func TestEncode(t *testing.T) {
 			assert.NotNil(t, block)
 			assert.Equal(t, RSASecretPEMLabel, block.Type)
 
-			decoded, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+			decoded, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 			assert.NoError(t, err)
 			assert.Equal(t, priv, decoded)
 		})
@@ -203,7 +215,7 @@ func TestEncode(t *testing.T) {
 			assert.NotNil(t, block)
 			assert.Equal(t, ECDSASecretPEMLabel, block.Type)
 
-			decoded, err := x509.ParseECPrivateKey(block.Bytes)
+			decoded, err := x509.ParsePKCS8PrivateKey(block.Bytes)
 			assert.NoError(t, err)
 			assert.Equal(t, priv, decoded)
 		})
@@ -238,8 +250,12 @@ func TestEncode(t *testing.T) {
 			assert.NotNil(t, block)
 			assert.Equal(t, ED25519SecretPEMLabel, block.Type)
 
+			var decodedInfo pkcs8PrivateKey
+			_, err = asn1.Unmarshal(block.Bytes, &decodedInfo)
+			require.NoError(t, err)
+
 			var decoded ed25519.PrivateKey
-			_, err = asn1.Unmarshal(block.Bytes, &decoded)
+			_, err = asn1.Unmarshal(decodedInfo.PrivateKey, &decoded)
 			assert.NoError(t, err)
 			assert.Equal(t, priv, decoded)
 		})

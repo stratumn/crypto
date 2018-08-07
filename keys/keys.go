@@ -190,6 +190,14 @@ func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
  SECRET KEYS' ENCODING FUNCTIONS.
 */
 
+// The following is just a copy of https://golang.org/src/crypto/x509/pkcs8.go
+// We need to do this to add the ED25519 key type.
+type pkcs8PrivateKey struct {
+	Version    int
+	Algo       pkix.AlgorithmIdentifier
+	PrivateKey []byte
+}
+
 // EncodeSecretkey serializes a secret key to the PEM format.
 func EncodeSecretkey(priv crypto.PrivateKey) ([]byte, error) {
 	switch priv.(type) {
@@ -211,15 +219,21 @@ func ParseSecretKey(sk []byte) (priv crypto.PrivateKey, pub crypto.PublicKey, er
 		return nil, nil, encoding.ErrBadPEMFormat
 	}
 
-	switch block.Type {
-	case ED25519SecretPEMLabel:
-		priv, pub, err = ParseED25519Key(sk)
+	var privKeyInfo pkcs8PrivateKey
+	if _, err := asn1.Unmarshal(block.Bytes, &privKeyInfo); err != nil {
+		return nil, nil, err
+	}
 
-	case ECDSASecretPEMLabel:
-		priv, pub, err = ParseECDSAKey(sk)
+	algo := privKeyInfo.Algo.Algorithm
+	switch {
+	case algo.Equal(OIDPublicKeyED25519):
+		priv, pub, err = UnmarshalED25519Key(privKeyInfo.PrivateKey)
 
-	case RSASecretPEMLabel:
-		priv, pub, err = ParseRSAKey(sk)
+	case algo.Equal(OIDPublicKeyECDSA):
+		priv, pub, err = ParseECDSAPKCS8Key(sk)
+
+	case algo.Equal(OIDPublicKeyRSA):
+		priv, pub, err = ParseRSAPKCS8Key(sk)
 	}
 
 	if err != nil {

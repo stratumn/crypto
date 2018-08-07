@@ -20,12 +20,13 @@ import (
 	"crypto/rsa"
 	"crypto/x509"
 
+	"github.com/pkg/errors"
 	"github.com/stratumn/go-crypto/encoding"
 )
 
 const (
 	// RSAKeySize is the size of the created RSA key. This is not yet configurable but it should be in the future.
-	RSAKeySize = 4096
+	RSAKeySize = 2048
 
 	// RSASecretPEMLabel is the label of a PEM-encoded RSA secret key.
 	RSASecretPEMLabel = "RSA PRIVATE KEY"
@@ -43,23 +44,34 @@ func NewRSAKeyPair() (crypto.PublicKey, *rsa.PrivateKey, error) {
 	return priv.Public(), priv, nil
 }
 
-// EncodeRSASecretKey encodes an RSA key in ASN.1 DER format within a PEM block.
+// EncodeRSASecretKey encodes an RSA key in ASN.1 DER format within a PEM block
+// embedded in PKCS#8.
 func EncodeRSASecretKey(sk *rsa.PrivateKey) ([]byte, error) {
-	skBytes := x509.MarshalPKCS1PrivateKey(sk)
+	skBytes, err := x509.MarshalPKCS8PrivateKey(sk)
+	if err != nil {
+		return nil, err
+	}
+
 	return encoding.EncodePEM(skBytes, RSASecretPEMLabel)
 }
 
-// ParseRSAKey decodes a PEM block containing an ASN1. DER encoded private key of type RSA.
-func ParseRSAKey(sk []byte) (*rsa.PrivateKey, *rsa.PublicKey, error) {
+// ParseRSAPKCS8Key decodes a PEM block containing an ASN1. DER encoded
+// private key of type RSA embedded in PKCS#8.
+func ParseRSAPKCS8Key(sk []byte) (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	DERBytes, err := encoding.DecodePEM(sk, RSASecretPEMLabel)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	data, err := x509.ParsePKCS1PrivateKey(DERBytes)
+	data, err := x509.ParsePKCS8PrivateKey(DERBytes)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	return data, data.Public().(*rsa.PublicKey), nil
+	key, ok := data.(*rsa.PrivateKey)
+	if !ok {
+		return nil, nil, errors.New("failed to parse RSA private key embedded in PKCS#8")
+	}
+
+	return key, key.Public().(*rsa.PublicKey), nil
 }
