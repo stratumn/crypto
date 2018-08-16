@@ -21,12 +21,10 @@ import "github.com/gogo/protobuf/gogoproto/gogo.proto";
 option go_package = "github.com/stratumn/go-crypto/signatures;signatures";
 
 // Signature describes a signed message. It contains:
-// - the digital signature algorithm used to sign the message
 // - the publicKey of the signer
 // - the original message
 // - the signature. Depending on the algorithm, either the whole message or just a hash of it is signed.
 message Signature {
-    string AI = 1 [(gogoproto.jsontag) = "algorithm"];
     bytes publicKey = 2 [(gogoproto.jsontag) = "public_key"];
     bytes signature = 3;
     bytes message = 4;

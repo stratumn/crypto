@@ -31,7 +31,7 @@ var ErrInvalidSignature = errors.New("signature verification failed")
 // it returns nil if the signature is correct. Except for ED25519 signatures
 // it relies on x509 signature check for certificates.
 func Verify(signature *Signature) error {
-	pk, err := keys.ParsePublicKey(signature.PublicKey)
+	pk, ai, err := keys.ParsePublicKey(signature.PublicKey)
 	if err != nil {
 		return err
 	}
@@ -41,12 +41,16 @@ func Verify(signature *Signature) error {
 		return err
 	}
 
-	ai, err := getSignatureAlgorithmFromIdentifier(signature.AI)
+	algo, err := getSignatureAlgorithmFromIdentifier(ai.Algorithm)
 	if err != nil {
 		return err
 	}
 
-	if ai == PureED25519 {
+	if algo == x509.UnknownSignatureAlgorithm {
+		return errors.New("unknown public key algorithm")
+	}
+
+	if algo == PureED25519 {
 		if pub, ok := pk.(*ed25519.PublicKey); ok {
 			if ed25519.Verify(*pub, signature.Message, sigBytes) {
 				return nil
@@ -57,7 +61,7 @@ func Verify(signature *Signature) error {
 	}
 
 	crt := x509.Certificate{PublicKey: pk}
-	if err := crt.CheckSignature(ai, signature.Message, sigBytes); err != nil {
+	if err := crt.CheckSignature(algo, signature.Message, sigBytes); err != nil {
 		return errors.Wrap(ErrInvalidSignature, err.Error())
 	}
 	return nil

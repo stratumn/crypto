@@ -21,7 +21,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509"
 	"encoding/asn1"
 	"encoding/pem"
 	"math/big"
@@ -50,7 +49,7 @@ func TestSign(t *testing.T) {
 		sig, err := Sign(encoded, msg)
 		require.NoError(t, err)
 
-		pub, err := keys.ParsePublicKey(sig.PublicKey)
+		pub, ai, err := keys.ParsePublicKey(sig.PublicKey)
 		require.NoError(t, err)
 		h := sha256.New()
 		h.Write(msg)
@@ -58,6 +57,7 @@ func TestSign(t *testing.T) {
 
 		DER, _ := pem.Decode(sig.Signature)
 
+		assert.Equal(t, keys.OIDPublicKeyRSA, ai.Algorithm)
 		assert.NoError(t, rsa.VerifyPKCS1v15(pub.(*rsa.PublicKey), crypto.SHA256, d, DER.Bytes))
 		assert.Error(t, rsa.VerifyPKCS1v15(pub.(*rsa.PublicKey), crypto.SHA256, otherMsg, DER.Bytes))
 	})
@@ -71,7 +71,7 @@ func TestSign(t *testing.T) {
 		sig, err := Sign(encoded, msg)
 		require.NoError(t, err)
 
-		pub, err := keys.ParsePublicKey(sig.PublicKey)
+		pub, ai, err := keys.ParsePublicKey(sig.PublicKey)
 		require.NoError(t, err)
 		h := sha256.New()
 		h.Write(msg)
@@ -81,6 +81,8 @@ func TestSign(t *testing.T) {
 		var ecdsaSignature struct{ R, S *big.Int }
 		_, err = asn1.Unmarshal(DER.Bytes, &ecdsaSignature)
 		require.NoError(t, err)
+
+		assert.Equal(t, keys.OIDPublicKeyECDSA, ai.Algorithm)
 		assert.True(t, ecdsa.Verify(pub.(*ecdsa.PublicKey), d, ecdsaSignature.R, ecdsaSignature.S))
 		assert.False(t, ecdsa.Verify(pub.(*ecdsa.PublicKey), d, big.NewInt(10), ecdsaSignature.S))
 	})
@@ -94,11 +96,12 @@ func TestSign(t *testing.T) {
 		sig, err := Sign(encoded, msg)
 		require.NoError(t, err)
 
-		pub, err := keys.ParsePublicKey(sig.PublicKey)
+		pub, ai, err := keys.ParsePublicKey(sig.PublicKey)
 		require.NoError(t, err)
 
 		DER, _ := pem.Decode(sig.Signature)
 
+		assert.Equal(t, keys.OIDPublicKeyED25519, ai.Algorithm)
 		assert.True(t, ed25519.Verify(*pub.(*ed25519.PublicKey), sig.Message, DER.Bytes))
 		assert.False(t, ed25519.Verify(*pub.(*ed25519.PublicKey), otherMsg, DER.Bytes))
 	})
@@ -129,7 +132,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[x509.SHA256WithRSA],
 			Message:   msg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -138,7 +140,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[x509.SHA256WithRSA],
 			Message:   otherMsg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -175,7 +176,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[x509.ECDSAWithSHA256],
 			Message:   msg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -184,7 +184,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[x509.ECDSAWithSHA256],
 			Message:   otherMsg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -206,7 +205,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[PureED25519],
 			Message:   msg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -214,7 +212,6 @@ func TestVerify(t *testing.T) {
 		require.NoError(t, err)
 
 		err = Verify(&Signature{
-			AI:        algoName[PureED25519],
 			Message:   otherMsg,
 			PublicKey: pkBytes,
 			Signature: sigPEM,
@@ -223,23 +220,22 @@ func TestVerify(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("Unsupported algorithm", func(t *testing.T) {
-		pk, _, err := ed25519.GenerateKey(rand.Reader)
-		pkBytes, err := keys.EncodePublicKey(&pk)
-		require.NoError(t, err)
-		sigPEM, err := encoding.EncodePEM([]byte("test"), SignaturePEMLabel)
-		require.NoError(t, err)
+	// t.Run("Unsupported algorithm", func(t *testing.T) {
+	// 	pk, _, err := ed25519.GenerateKey(rand.Reader)
+	// 	pkBytes, err := keys.EncodePublicKey(pk)
+	// 	require.NoError(t, err)
+	// 	sigPEM, err := encoding.EncodePEM([]byte("test"), SignaturePEMLabel)
+	// 	require.NoError(t, err)
 
-		err = Verify(&Signature{
-			AI:        "test",
-			Message:   otherMsg,
-			PublicKey: pkBytes,
-			Signature: sigPEM,
-		})
+	// 	err = Verify(&Signature{
+	// 		Message:   otherMsg,
+	// 		PublicKey: pkBytes,
+	// 		Signature: sigPEM,
+	// 	})
 
-		require.EqualError(t, err, x509.ErrUnsupportedAlgorithm.Error())
+	// 	require.EqualError(t, err, x509.ErrUnsupportedAlgorithm.Error())
 
-	})
+	// })
 }
 
 func TestEncode(t *testing.T) {
@@ -250,7 +246,6 @@ func TestEncode(t *testing.T) {
 	require.NoError(t, err)
 
 	sig := &Signature{
-		AI:        "test",
 		Message:   otherMsg,
 		PublicKey: pkBytes,
 		Signature: sigPEM,
@@ -262,7 +257,6 @@ func TestEncode(t *testing.T) {
 	parsed, err := ParseSignature(b)
 	require.NoError(t, err)
 
-	assert.Equal(t, sig.AI, parsed.AI)
 	assert.Equal(t, sig.Message, parsed.Message)
 	assert.Equal(t, sig.PublicKey, parsed.PublicKey)
 	assert.Equal(t, sig.Signature, parsed.Signature)

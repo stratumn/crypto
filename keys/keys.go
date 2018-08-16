@@ -152,38 +152,42 @@ func EncodePublicKey(pub crypto.PublicKey) ([]byte, error) {
 // ParsePKIXPublicKey parses a DER encoded public key.
 // If of type ED25519 it parses the public key directly,
 // if not it relies on x509 public key parser.
-func ParsePKIXPublicKey(pk []byte) (crypto.PublicKey, error) {
+func ParsePKIXPublicKey(pk []byte) (crypto.PublicKey, *pkix.AlgorithmIdentifier, error) {
 	var pkInfo publicKeyInfo
 	if rest, err := asn1.Unmarshal(pk, &pkInfo); err != nil {
-		return nil, err
+		return nil, nil, err
 	} else if len(rest) != 0 {
-		return nil, errors.New("trailing data after ASN.1 of public-key")
+		return nil, nil, errors.New("trailing data after ASN.1 of public-key")
 	}
 
 	if pkInfo.Algorithm.Algorithm.Equal(OIDPublicKeyED25519) {
 		if len(pkInfo.PublicKey.Bytes) != ed25519.PublicKeySize {
-			return nil, errors.New("invalid Ed25519 public key")
+			return nil, nil, errors.New("invalid Ed25519 public key")
 		}
 		pub := ed25519.PublicKey(pkInfo.PublicKey.Bytes)
-		return &pub, nil
+		return &pub, &pkInfo.Algorithm, nil
 	}
 
-	return x509.ParsePKIXPublicKey(pk)
+	pub, err := x509.ParsePKIXPublicKey(pk)
+	if err != nil {
+		return nil, nil, err
+	}
+	return pub, &pkInfo.Algorithm, nil
 }
 
 // ParsePublicKey parses a PEM encoded public Key
 // If of type ED25519 it parses the public key directly,
 // if not it relies on x509 public key parser.
-func ParsePublicKey(pk []byte) (crypto.PublicKey, error) {
+func ParsePublicKey(pk []byte) (crypto.PublicKey, *pkix.AlgorithmIdentifier, error) {
 	for _, keyType := range HandledPublicKeys {
 		DERBytes, err := encoding.DecodePEM(pk, keyType)
 		if err == encoding.ErrBadPEMFormat {
-			return nil, err
+			return nil, nil, err
 		} else if err == nil {
 			return ParsePKIXPublicKey(DERBytes)
 		}
 	}
-	return nil, errors.Errorf("Could not parse public key, handled types are: %v", strings.Join(HandledPublicKeys, ", "))
+	return nil, nil, errors.Errorf("Could not parse public key, handled types are: %v", strings.Join(HandledPublicKeys, ", "))
 }
 
 /*

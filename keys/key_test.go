@@ -276,8 +276,9 @@ func TestParse(t *testing.T) {
 		t.Run("Public key", func(t *testing.T) {
 			encoded, err := EncodePublicKey(pub)
 			require.NoError(t, err)
-			decodedPub, err := ParsePublicKey(encoded)
+			decodedPub, ai, err := ParsePublicKey(encoded)
 			require.NoError(t, err)
+			assert.Equal(t, OIDPublicKeyRSA, ai.Algorithm)
 			assert.Equal(t, pub, decodedPub)
 		})
 
@@ -298,8 +299,9 @@ func TestParse(t *testing.T) {
 		t.Run("Public key", func(t *testing.T) {
 			encoded, err := EncodePublicKey(pub)
 			require.NoError(t, err)
-			decodedPub, err := ParsePublicKey(encoded)
+			decodedPub, ai, err := ParsePublicKey(encoded)
 			require.NoError(t, err)
+			assert.Equal(t, OIDPublicKeyECDSA, ai.Algorithm)
 			assert.Equal(t, pub, decodedPub)
 		})
 
@@ -321,8 +323,9 @@ func TestParse(t *testing.T) {
 		t.Run("Public key", func(t *testing.T) {
 			encoded, err := EncodePublicKey(pub)
 			require.NoError(t, err)
-			decodedPub, err := ParsePublicKey(encoded)
+			decodedPub, ai, err := ParsePublicKey(encoded)
 			require.NoError(t, err)
+			assert.Equal(t, OIDPublicKeyED25519, ai.Algorithm)
 			assert.Equal(t, pub, decodedPub)
 		})
 
@@ -339,13 +342,13 @@ func TestParse(t *testing.T) {
 
 	t.Run("Bad format", func(t *testing.T) {
 		t.Run("Not PEM", func(t *testing.T) {
-			_, err := ParsePublicKey([]byte("test"))
+			_, _, err := ParsePublicKey([]byte("test"))
 			assert.EqualError(t, err, encoding.ErrBadPEMFormat.Error())
 		})
 		t.Run("Unhandled public key", func(t *testing.T) {
 			pub, _, _ := GenerateKey(ED25519)
 			unhandledPub := strings.Replace(string(pub), "ED25519", "UNKNOWN", 2)
-			_, err := ParsePublicKey([]byte(string(unhandledPub)))
+			_, _, err := ParsePublicKey([]byte(string(unhandledPub)))
 			assert.EqualError(t, err, "Could not parse public key, handled types are: ED25519 PUBLIC KEY, EC PUBLIC KEY, RSA PUBLIC KEY, PUBLIC KEY")
 		})
 		t.Run("Secret key", func(t *testing.T) {
