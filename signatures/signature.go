@@ -62,7 +62,7 @@ func (s *Signature) Encode() ([]byte, error) {
 	return encoding.EncodePEM(sigBytes, SignaturePEMLabel)
 }
 
-var signatureAlgorithms = map[x509.SignatureAlgorithm]asn1.ObjectIdentifier{
+var signatureAlgorithmByPK = map[x509.SignatureAlgorithm]asn1.ObjectIdentifier{
 	x509.SHA256WithRSA:   keys.OIDPublicKeyRSA,
 	x509.DSAWithSHA256:   keys.OIDPublicKeyDSA,
 	x509.ECDSAWithSHA256: keys.OIDPublicKeyECDSA,
@@ -70,7 +70,7 @@ var signatureAlgorithms = map[x509.SignatureAlgorithm]asn1.ObjectIdentifier{
 }
 
 func getSignatureAlgorithmFromIdentifier(algo asn1.ObjectIdentifier) (x509.SignatureAlgorithm, error) {
-	for sigAlgo, pkAlgo := range signatureAlgorithms {
+	for sigAlgo, pkAlgo := range signatureAlgorithmByPK {
 		if algo.Equal(pkAlgo) {
 			return sigAlgo, nil
 		}

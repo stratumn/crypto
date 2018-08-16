@@ -21,6 +21,7 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/asn1"
 	"encoding/pem"
 	"math/big"
@@ -219,23 +220,20 @@ func TestVerify(t *testing.T) {
 
 		require.Error(t, err)
 	})
+}
 
-	// t.Run("Unsupported algorithm", func(t *testing.T) {
-	// 	pk, _, err := ed25519.GenerateKey(rand.Reader)
-	// 	pkBytes, err := keys.EncodePublicKey(pk)
-	// 	require.NoError(t, err)
-	// 	sigPEM, err := encoding.EncodePEM([]byte("test"), SignaturePEMLabel)
-	// 	require.NoError(t, err)
+func TestGetSignatureAlgorithmFromIdentifier(t *testing.T) {
 
-	// 	err = Verify(&Signature{
-	// 		Message:   otherMsg,
-	// 		PublicKey: pkBytes,
-	// 		Signature: sigPEM,
-	// 	})
+	t.Run("Known algo", func(t *testing.T) {
+		sigAlgo, err := getSignatureAlgorithmFromIdentifier(keys.OIDPublicKeyED25519)
+		require.NoError(t, err)
+		require.Equal(t, PureED25519, sigAlgo)
+	})
 
-	// 	require.EqualError(t, err, x509.ErrUnsupportedAlgorithm.Error())
-
-	// })
+	t.Run("Unknown algo", func(t *testing.T) {
+		_, err := getSignatureAlgorithmFromIdentifier(asn1.ObjectIdentifier{99})
+		require.EqualError(t, err, x509.ErrUnsupportedAlgorithm.Error())
+	})
 }
 
 func TestEncode(t *testing.T) {

@@ -46,10 +46,6 @@ func Verify(signature *Signature) error {
 		return err
 	}
 
-	if algo == x509.UnknownSignatureAlgorithm {
-		return errors.New("unknown public key algorithm")
-	}
-
 	if algo == PureED25519 {
 		if pub, ok := pk.(*ed25519.PublicKey); ok {
 			if ed25519.Verify(*pub, signature.Message, sigBytes) {
