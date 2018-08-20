@@ -20,7 +20,6 @@ import (
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
-	"crypto/x509/pkix"
 
 	"github.com/pkg/errors"
 	"github.com/stratumn/go-crypto/encoding"
@@ -44,33 +43,23 @@ func Sign(secretKey, msg []byte) (*Signature, error) {
 	}
 
 	var signed []byte
-	var ai pkix.AlgorithmIdentifier
 	var opts crypto.SignerOpts
 	switch sk.(type) {
 	case *ed25519.PrivateKey:
 		if len(*sk.(*ed25519.PrivateKey)) != ed25519.PrivateKeySize {
-			return nil, errors.Errorf("%s private key length must be %d, got %d", algoName[PureED25519], ed25519.PrivateKeySize, len(*sk.(*ed25519.PrivateKey)))
+			return nil, errors.Errorf("ED25519 private key length must be %d, got %d", ed25519.PrivateKeySize, len(*sk.(*ed25519.PrivateKey)))
 		}
 		signed = msg
-		ai = pkix.AlgorithmIdentifier{
-			Algorithm: OIDSignaturePureED25519,
-		}
 		opts = crypto.Hash(0)
 	case *ecdsa.PrivateKey:
 		h := sha256.New()
 		h.Write(msg)
 		signed = h.Sum(nil)
-		ai = pkix.AlgorithmIdentifier{
-			Algorithm: OIDSignatureECDSAWithSHA256,
-		}
 		opts = crypto.SHA256
 	case *rsa.PrivateKey:
 		h := sha256.New()
 		h.Write(msg)
 		signed = h.Sum(nil)
-		ai = pkix.AlgorithmIdentifier{
-			Algorithm: OIDSignatureSHA256WithRSA,
-		}
 		opts = crypto.SHA256
 	default:
 		return nil, ErrNotImplemented
@@ -92,7 +81,6 @@ func Sign(secretKey, msg []byte) (*Signature, error) {
 	}
 
 	return &Signature{
-		AI:        algoName[getSignatureAlgorithmFromAI(ai)],
 		Signature: PEMSignature,
 		Message:   msg,
 		PublicKey: PEMPublicKey,
