@@ -2,60 +2,81 @@
 
 
 [[projects]]
+  digest = "1:56c130d885a4aacae1dd9c7b71cfe39912c7ebc1ff7d2b46083c8812996dc43b"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
+  pruneopts = ""
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:0a3f6a0c68ab8f3d455f8892295503b179e571b7fefe47cc6c556405d1f83411"
   name = "github.com/gogo/protobuf"
   packages = [
     "gogoproto",
     "proto",
-    "protoc-gen-gogo/descriptor"
+    "protoc-gen-gogo/descriptor",
   ]
+  pruneopts = ""
   revision = "1adfc126b41513cc696b209667c8656ea7aac67c"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:f958a1c137db276e52f0b50efee41a1a389dcdded59a69711f3e872757dab34b"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
+  pruneopts = ""
   revision = "b4deda0973fb4c70b50d226b1af49f3da59f5265"
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:7365acd48986e205ccb8652cc746f09c8b7876030d53710ea6ef7d0bd0dcd7ca"
   name = "github.com/pkg/errors"
   packages = ["."]
+  pruneopts = ""
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
 [[projects]]
+  digest = "1:256484dbbcd271f9ecebc6795b2df8cad4c458dd0f5fd82a8c2fa0c29f233411"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
+  pruneopts = ""
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:c587772fb8ad29ad4db67575dad25ba17a51f072ff18a22b4f0257a4d9c24f75"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "require"
+    "require",
   ]
+  pruneopts = ""
   revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
   version = "v1.2.2"
 
 [[projects]]
   branch = "master"
+  digest = "1:2b051135019435c0cf95756a3ff5366b87ddc7e06e91571506c6264ce721784f"
   name = "golang.org/x/crypto"
   packages = [
     "ed25519",
-    "ed25519/internal/edwards25519"
+    "ed25519/internal/edwards25519",
   ]
+  pruneopts = ""
   revision = "7f39a6fea4fe9364fb61e1def6a268a51b4f3a06"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "90b8ed8ab57ec369919bc1e1555db760ee11a719750d466c71bcabe389f12295"
+  input-imports = [
+    "github.com/gogo/protobuf/gogoproto",
+    "github.com/golang/protobuf/proto",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify/assert",
+    "github.com/stretchr/testify/require",
+    "golang.org/x/crypto/ed25519",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
