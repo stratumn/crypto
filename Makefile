@@ -11,7 +11,7 @@ COVERHTML_FILE=coverhtml.txt
 CLEAN_PATHS=$(DIST_DIR) $(COVERAGE_FILE) $(COVERHTML_FILE)
 
 GO_CMD=go
-GO_LINT_CMD=golint
+GO_LINT_CMD=golangci-lint
 GITHUB_RELEASE_COMMAND=github-release
 
 GITHUB_RELEASE_FLAGS=--user '$(GITHUB_USER)' --repo '$(GITHUB_REPO)' --tag '$(GIT_TAG)'
@@ -23,7 +23,7 @@ PROTOS_GO=$(PROTOS:.proto=.pb.go)
 GO_LIST=$(GO_CMD) list
 GO_TEST=$(GO_CMD) test
 GO_GET=$(GO_CMD) get
-GO_LINT=$(GO_LINT_CMD) -set_exit_status
+GO_LINT=$(GO_LINT_CMD) run --build-tags="lint" --disable="gas" --deadline=4m --tests=false
 GITHUB_RELEASE_RELEASE=$(GITHUB_RELEASE_COMMAND) release $(GITHUB_RELEASE_RELEASE_FLAGS)
 GITHUB_RELEASE_EDIT=$(GITHUB_RELEASE_COMMAND) edit $(GITHUB_RELEASE_RELEASE_FLAGS)
 
@@ -92,11 +92,9 @@ coverhtml:
 	$(GO_CMD) tool cover -html $(COVERHTML_FILE)
 
 
-# == list =====================================================================
-lint: $(LINT_LIST)
-
-$(LINT_LIST): lint_%:
-	@$(GO_LINT) $*
+# == lint =====================================================================
+lint:
+	@$(GO_LINT) ./...
 
 # == git_tag ==================================================================
 git_tag:

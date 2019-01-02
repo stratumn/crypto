@@ -53,12 +53,18 @@ func Sign(secretKey, msg []byte) (*Signature, error) {
 		opts = crypto.Hash(0)
 	case *ecdsa.PrivateKey:
 		h := sha256.New()
-		h.Write(msg)
+		_, err := h.Write(msg)
+		if err != nil {
+			return nil, err
+		}
 		signed = h.Sum(nil)
 		opts = crypto.SHA256
 	case *rsa.PrivateKey:
 		h := sha256.New()
-		h.Write(msg)
+		_, err := h.Write(msg)
+		if err != nil {
+			return nil, err
+		}
 		signed = h.Sum(nil)
 		opts = crypto.SHA256
 	default:
