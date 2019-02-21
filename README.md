@@ -111,3 +111,78 @@ func main() {
 // my data
 }
 ```
+
+## encryption
+
+This package lets you encrypt and decrypt messages. For now, only RSA keys are supported.
+We expose two different encryption schemes:
+
+- RSA-OAEP + AES-GCM to encrypt any size of message. The message is encrypted using a symmetric AES-GCM-256 key,
+  and that key is in turn encrypted using RSA-OAEP
+
+```golang
+import (
+	"crypto/x509"
+	"fmt"
+
+	"github.com/stratumn/go-crypto/encryption"
+	"github.com/stratumn/go-crypto/keys"
+)
+
+func main() {
+	pub, priv, err := keys.GenerateKey(x509.RSA)
+	fmt.Println(string(priv))
+	// -----BEGIN ED25519 PRIVATE KEY-----
+	// MIIJKgIBAAKCAgEAySIguzsYqm4p+I5/DU0dkUasSHhzc0xPQsjBeR1/iNAoZP4n
+	// ...
+	// -----END ED25519 PRIVATE KEY-----
+
+	// let's sign a messae
+	message := []byte("a very secret message")
+	ciphertext, err := encryption.Encrypt(pub, message)
+
+	// verify that the signature is valid
+	plaintext, err := encryption.Decrypt(priv, ciphertext)
+	if err != nil {
+		panic("decryption failed !")
+	}
+
+	fmt.Println(string(plaintext))
+	// a very secret message
+}
+```
+
+- RSA-OAEP to encrypt short messages. The message is directly encrypted using the asymmetric algo.
+  The message size should be limited to keyLenBits / 8 - 42 = 214 bytes for 2048 RSA keys.
+
+```golang
+import (
+	"crypto/x509"
+	"fmt"
+
+	"github.com/stratumn/go-crypto/encryption"
+	"github.com/stratumn/go-crypto/keys"
+)
+
+func main() {
+	pub, priv, err := keys.GenerateKey(x509.RSA)
+	fmt.Println(string(priv))
+	// -----BEGIN ED25519 PRIVATE KEY-----
+	// MIIJKgIBAAKCAgEAySIguzsYqm4p+I5/DU0dkUasSHhzc0xPQsjBeR1/iNAoZP4n
+	// ...
+	// -----END ED25519 PRIVATE KEY-----
+
+	// let's sign a messae
+	message := []byte("a very secret message")
+	ciphertext, err := encryption.EncryptShort(pub, message)
+
+	// verify that the signature is valid
+	plaintext, err := encryption.DecryptShort(priv, ciphertext)
+	if err != nil {
+		panic("decryption failed !")
+	}
+
+	fmt.Println(string(plaintext))
+	// a very secret message
+}
+```
