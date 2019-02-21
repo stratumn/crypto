@@ -44,7 +44,7 @@ func Encrypt(publicKey, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	gcm, err := cipher.NewGCMWithTagSize(c, tagLength)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		return nil, err
 	}

@@ -76,7 +76,7 @@ func Decrypt(secretKey, data []byte) ([]byte, error) {
 	if err != nil {
 		return nil, ErrCouldNotDecrypt
 	}
-	gcm, err := cipher.NewGCMWithTagSize(c, tagLength)
+	gcm, err := cipher.NewGCM(c)
 	if err != nil {
 		return nil, ErrCouldNotDecrypt
 	}
