@@ -28,6 +28,5 @@ var (
 
 const (
 	ivLength     = 12
-	tagLength    = 16
 	aesKeyLength = 32
 )

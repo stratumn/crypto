@@ -117,8 +117,8 @@ func main() {
 This package lets you encrypt and decrypt messages. For now, only RSA keys are supported.
 We expose two different encryption schemes:
 
-- RSA-OAEP + AES-GCM to encrypt any size of message. The message is encrypted using a symmetric AES-GCM-256 key,
-  and that key is in turn encrypted using RSA-OAEP
+- RSA-OAEP + AES-GCM to encrypt any size of message. The message is first encrypted using a symmetric AES-GCM-256 with 12 byte IVs and 16 byte authentication tags.
+  The AES key is then encrypted using RSA-OAEP
 
 ```golang
 import (
