@@ -18,12 +18,11 @@ package encryption
 
 import "github.com/pkg/errors"
 
-// ErrNotImplemented is the error returned when trying to sign a message with an unimplemented algorithm.
 var (
 	// ErrCouldNotDecrypt is returned when the message decryption has failed for crypto reasons.
 	ErrCouldNotDecrypt = errors.New("could not decrypt the message")
 
-	// ErrNotImplemented is returned when trying to use an  algo that does not handle encryption.
+	// ErrNotImplemented is returned when trying to use an algo that does not handle encryption.
 	ErrNotImplemented = errors.New("Unhandled encryption algorithm")
 )
 

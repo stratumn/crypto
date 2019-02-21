@@ -21,7 +21,6 @@ import (
 	"crypto/rsa"
 	"crypto/sha1"
 	"encoding/base64"
-	"fmt"
 
 	"github.com/stratumn/go-crypto/keys"
 )
@@ -95,7 +94,6 @@ func Encrypt(publicKey, data []byte) ([]byte, error) {
 func EncryptShort(publicKey, data []byte) ([]byte, error) {
 	pk, _, err := keys.ParsePublicKey(publicKey)
 	if err != nil {
-		fmt.Println("============================")
 		return nil, err
 	}
 

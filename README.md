@@ -63,7 +63,7 @@ func main() {
 // ...
 // -----END ED25519 PRIVATE KEY-----
 
-    // let's sign a messae
+    // let's sign a message
     message := "message"
     signature, err := signatures.Sign(priv, message)
     fmt.Println(string(signature.Signature))
@@ -132,16 +132,16 @@ import (
 func main() {
 	pub, priv, err := keys.GenerateKey(x509.RSA)
 	fmt.Println(string(priv))
-	// -----BEGIN ED25519 PRIVATE KEY-----
-	// MIIJKgIBAAKCAgEAySIguzsYqm4p+I5/DU0dkUasSHhzc0xPQsjBeR1/iNAoZP4n
+	// -----BEGIN RSA PRIVATE KEY-----
+    // MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKtI8b9kKcUDBE
 	// ...
-	// -----END ED25519 PRIVATE KEY-----
+	// -----END RSA PRIVATE KEY-----
 
-	// let's sign a messae
+	// let's encrypt a message
 	message := []byte("a very secret message")
 	ciphertext, err := encryption.Encrypt(pub, message)
 
-	// verify that the signature is valid
+	// and then decrypt it
 	plaintext, err := encryption.Decrypt(priv, ciphertext)
 	if err != nil {
 		panic("decryption failed !")
@@ -167,16 +167,16 @@ import (
 func main() {
 	pub, priv, err := keys.GenerateKey(x509.RSA)
 	fmt.Println(string(priv))
-	// -----BEGIN ED25519 PRIVATE KEY-----
-	// MIIJKgIBAAKCAgEAySIguzsYqm4p+I5/DU0dkUasSHhzc0xPQsjBeR1/iNAoZP4n
+	// -----BEGIN RSA PRIVATE KEY-----
+    // MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKtI8b9kKcUDBE
 	// ...
-	// -----END ED25519 PRIVATE KEY-----
+	// -----END RSA PRIVATE KEY-----
 
-	// let's sign a messae
+	// let's encrypt a message
 	message := []byte("a very secret message")
 	ciphertext, err := encryption.EncryptShort(pub, message)
 
-	// verify that the signature is valid
+	// and then decrypt it
 	plaintext, err := encryption.DecryptShort(priv, ciphertext)
 	if err != nil {
 		panic("decryption failed !")

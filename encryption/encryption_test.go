@@ -97,7 +97,7 @@ func TestEncrypt(t *testing.T) {
 		pk, _, _ := ed25519.GenerateKey(rand.Reader)
 		pkBytes, _ := keys.EncodePublicKey(&pk)
 
-		_, err := EncryptShort(pkBytes, []byte("123"))
+		_, err := Encrypt(pkBytes, []byte("123"))
 		assert.EqualError(t, err, ErrNotImplemented.Error())
 	})
 }
