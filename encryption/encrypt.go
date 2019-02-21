@@ -74,12 +74,14 @@ func Encrypt(publicKey, data []byte) ([]byte, error) {
 	switch pk.(type) {
 	case *rsa.PublicKey:
 		encryptedSymKey, err = rsa.EncryptOAEP(sha1.New(), rand.Reader, pk.(*rsa.PublicKey), aesKeyB64, nil)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, ErrNotImplemented
 	}
 
-	res := make([]byte, len(encryptedSymKey)+len(iv)+len(ciphertext))
-	res = append(encryptedSymKey, iv...)
+	res := append(encryptedSymKey, iv...)
 	res = append(res, ciphertext...)
 
 	return res, nil
