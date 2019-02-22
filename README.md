@@ -63,7 +63,7 @@ func main() {
 // ...
 // -----END ED25519 PRIVATE KEY-----
 
-    // let's sign a messae
+    // let's sign a message
     message := "message"
     signature, err := signatures.Sign(priv, message)
     fmt.Println(string(signature.Signature))
@@ -109,5 +109,80 @@ func main() {
     }
     fmt.Println(string(decoded))
 // my data
+}
+```
+
+## encryption
+
+This package lets you encrypt and decrypt messages. For now, only RSA keys are supported.
+We expose two different encryption schemes:
+
+- RSA-OAEP + AES-GCM to encrypt any size of message. The message is first encrypted using a symmetric AES-GCM-256 with 12 byte IVs and 16 byte authentication tags.
+  The AES key is then encrypted using RSA-OAEP
+
+```golang
+import (
+	"crypto/x509"
+	"fmt"
+
+	"github.com/stratumn/go-crypto/encryption"
+	"github.com/stratumn/go-crypto/keys"
+)
+
+func main() {
+	pub, priv, err := keys.GenerateKey(x509.RSA)
+	fmt.Println(string(priv))
+	// -----BEGIN RSA PRIVATE KEY-----
+    // MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKtI8b9kKcUDBE
+	// ...
+	// -----END RSA PRIVATE KEY-----
+
+	// let's encrypt a message
+	message := []byte("a very secret message")
+	ciphertext, err := encryption.Encrypt(pub, message)
+
+	// and then decrypt it
+	plaintext, err := encryption.Decrypt(priv, ciphertext)
+	if err != nil {
+		panic("decryption failed !")
+	}
+
+	fmt.Println(string(plaintext))
+	// a very secret message
+}
+```
+
+- RSA-OAEP to encrypt short messages. The message is directly encrypted using the asymmetric algo.
+  The message size should be limited to keyLenBits / 8 - 42 = 214 bytes for 2048 RSA keys.
+
+```golang
+import (
+	"crypto/x509"
+	"fmt"
+
+	"github.com/stratumn/go-crypto/encryption"
+	"github.com/stratumn/go-crypto/keys"
+)
+
+func main() {
+	pub, priv, err := keys.GenerateKey(x509.RSA)
+	fmt.Println(string(priv))
+	// -----BEGIN RSA PRIVATE KEY-----
+    // MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDKtI8b9kKcUDBE
+	// ...
+	// -----END RSA PRIVATE KEY-----
+
+	// let's encrypt a message
+	message := []byte("a very secret message")
+	ciphertext, err := encryption.EncryptShort(pub, message)
+
+	// and then decrypt it
+	plaintext, err := encryption.DecryptShort(priv, ciphertext)
+	if err != nil {
+		panic("decryption failed !")
+	}
+
+	fmt.Println(string(plaintext))
+	// a very secret message
 }
 ```
