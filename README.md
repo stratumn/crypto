@@ -114,7 +114,7 @@ func main() {
 
 ## encryption
 
-This package lets you encrypt and decrypt messages. For now, only RSA keys are supported.
+This package lets you encrypt and decrypt messages using asymmetric encryption. For now, only RSA keys are supported.
 We expose two different encryption schemes:
 
 - RSA-OAEP + AES-GCM to encrypt any size of message. The message is first encrypted using a symmetric AES-GCM-256 with 12 byte IVs and 16 byte authentication tags.
@@ -186,3 +186,10 @@ func main() {
 	// a very secret message
 }
 ```
+
+## AES
+
+This package lets you encrypt and decrypt messages using AES-256-GCM.
+
+`Encrypt` generated a random key and IV, encrypts the message and returns the ciphertext and the encryption key.
+`Decrypt` takes the ciphertext and teh key and returns the plaintext bytes.
