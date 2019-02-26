@@ -16,13 +16,11 @@ package encryption
 
 import (
 	"crypto"
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
-	"encoding/base64"
 
 	"github.com/pkg/errors"
+	"github.com/stratumn/go-crypto/aes"
 	"github.com/stratumn/go-crypto/keys"
 )
 
@@ -49,12 +47,12 @@ func Decrypt(secretKey, data []byte) ([]byte, error) {
 		return nil, ErrNotImplemented
 	}
 
-	if len(data) < aesKeyLength*8 {
+	if len(data) < aes.KeyLength*8 {
 		return nil, ErrCouldNotDecrypt
 	}
 
-	encryptedSymKey := data[:aesKeyLength*8]
-	cipherText := data[aesKeyLength*8:]
+	encryptedSymKey := data[:aes.KeyLength*8]
+	cipherText := data[aes.KeyLength*8:]
 
 	decrypter, ok := sk.(crypto.Decrypter)
 	if !ok {
@@ -66,30 +64,7 @@ func Decrypt(secretKey, data []byte) ([]byte, error) {
 		return nil, ErrCouldNotDecrypt
 	}
 
-	// The decrypted AES key is base64 encoded, we have to decode it.
-	aesKey, err = base64.StdEncoding.DecodeString(string(aesKey))
-	if err != nil {
-		return nil, ErrCouldNotDecrypt
-	}
-
-	c, err := aes.NewCipher(aesKey)
-	if err != nil {
-		return nil, ErrCouldNotDecrypt
-	}
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return nil, ErrCouldNotDecrypt
-	}
-
-	iv := cipherText[0:ivLength]
-	msg := cipherText[ivLength:]
-
-	res, err := gcm.Open(nil, iv, msg, nil)
-	if err != nil {
-		return nil, ErrCouldNotDecrypt
-	}
-
-	return res, nil
+	return aes.Decrypt(cipherText, aesKey)
 }
 
 // DecryptShort decrypt a short message.

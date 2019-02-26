@@ -15,13 +15,11 @@
 package encryption
 
 import (
-	"crypto/aes"
-	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha1"
-	"encoding/base64"
 
+	"github.com/stratumn/go-crypto/aes"
 	"github.com/stratumn/go-crypto/keys"
 )
 
@@ -31,31 +29,7 @@ import (
 // The we encrypt the AES key with the public key.
 // Returns the bytes of the ciphertext.
 func Encrypt(publicKey, data []byte) ([]byte, error) {
-
-	// Generate a random 256-bit key.
-	aesKey := make([]byte, aesKeyLength)
-	_, err := rand.Read(aesKey)
-	if err != nil {
-		return nil, err
-	}
-
-	// Encrypt the message with AES-256-GCM.
-	c, err := aes.NewCipher(aesKey)
-	if err != nil {
-		return nil, err
-	}
-	gcm, err := cipher.NewGCM(c)
-	if err != nil {
-		return nil, err
-	}
-
-	iv := make([]byte, ivLength)
-	_, err = rand.Read(iv)
-	if err != nil {
-		return nil, err
-	}
-
-	ciphertext := gcm.Seal(nil, iv, data, nil)
+	cipherText, aesKeyB64, err := aes.Encrypt(data)
 	if err != nil {
 		return nil, err
 	}
@@ -65,9 +39,6 @@ func Encrypt(publicKey, data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	// We encrypt the base64 encoding of the AES key...
-	// Same thing is done in @stratumn/js-crypto
-	aesKeyB64 := []byte(base64.StdEncoding.EncodeToString(aesKey))
 	var encryptedSymKey []byte
 
 	switch pk.(type) {
@@ -80,10 +51,7 @@ func Encrypt(publicKey, data []byte) ([]byte, error) {
 		return nil, ErrNotImplemented
 	}
 
-	res := append(encryptedSymKey, iv...)
-	res = append(res, ciphertext...)
-
-	return res, nil
+	return append(encryptedSymKey, cipherText...), nil
 }
 
 // EncryptShort encrypts a short message.
