@@ -30,6 +30,9 @@ import (
 // Returns the bytes of the ciphertext.
 func Encrypt(publicKey, data []byte) ([]byte, error) {
 	cipherText, aesKeyB64, err := aes.Encrypt(data)
+	if err != nil {
+		return nil, err
+	}
 
 	pk, _, err := keys.ParsePublicKey(publicKey)
 	if err != nil {

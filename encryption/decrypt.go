@@ -47,12 +47,12 @@ func Decrypt(secretKey, data []byte) ([]byte, error) {
 		return nil, ErrNotImplemented
 	}
 
-	if len(data) < aesKeyLength*8 {
+	if len(data) < aes.KeyLength*8 {
 		return nil, ErrCouldNotDecrypt
 	}
 
-	encryptedSymKey := data[:aesKeyLength*8]
-	cipherText := data[aesKeyLength*8:]
+	encryptedSymKey := data[:aes.KeyLength*8]
+	cipherText := data[aes.KeyLength*8:]
 
 	decrypter, ok := sk.(crypto.Decrypter)
 	if !ok {

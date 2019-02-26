@@ -31,8 +31,10 @@ var (
 )
 
 const (
-	ivLength     = 12
-	aesKeyLength = 32
+	// IVLength is the length of the IV.
+	IVLength = 12
+	// KeyLength is the length of the key.
+	KeyLength = 32
 )
 
 // Encrypt encrypts a message with AES-256-GCM with a random key.
@@ -40,7 +42,7 @@ const (
 // The key is base64 exported to follow the pattern chosen in @stratumn/js-crypto...
 func Encrypt(data []byte) ([]byte, []byte, error) {
 	// Generate a random 256-bit key.
-	key := make([]byte, aesKeyLength)
+	key := make([]byte, KeyLength)
 	_, err := rand.Read(key)
 	if err != nil {
 		return nil, nil, err
@@ -56,7 +58,7 @@ func Encrypt(data []byte) ([]byte, []byte, error) {
 		return nil, nil, err
 	}
 
-	iv := make([]byte, ivLength)
+	iv := make([]byte, IVLength)
 	_, err = rand.Read(iv)
 	if err != nil {
 		return nil, nil, err
@@ -90,8 +92,8 @@ func Decrypt(data, b64Key []byte) ([]byte, error) {
 		return nil, ErrCouldNotDecrypt
 	}
 
-	iv := data[0:ivLength]
-	msg := data[ivLength:]
+	iv := data[0:IVLength]
+	msg := data[IVLength:]
 
 	res, err := gcm.Open(nil, iv, msg, nil)
 	if err != nil {

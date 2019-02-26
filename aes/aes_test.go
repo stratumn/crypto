@@ -47,7 +47,7 @@ func TestDecrypt(t *testing.T) {
 }
 
 func TestDecrypt_Fail(t *testing.T) {
-	k := make([]byte, aesKeyLength)
+	k := make([]byte, KeyLength)
 	rand.Read(key)
 	pt, err := Decrypt(ciphertext, k)
 	assert.EqualError(t, err, ErrCouldNotDecrypt.Error())

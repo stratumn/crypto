@@ -25,8 +25,3 @@ var (
 	// ErrNotImplemented is returned when trying to use an algo that does not handle encryption.
 	ErrNotImplemented = errors.New("Unhandled encryption algorithm")
 )
-
-const (
-	ivLength     = 12
-	aesKeyLength = 32
-)
