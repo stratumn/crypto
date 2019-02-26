@@ -191,5 +191,5 @@ func main() {
 
 This package lets you encrypt and decrypt messages using AES-256-GCM.
 
-`Encrypt` generated a random key and IV, encrypts the message and returns the ciphertext and the encryption key.
-`Decrypt` takes the ciphertext and teh key and returns the plaintext bytes.
+`Encrypt` generates a random key and IV, encrypts the message and returns the ciphertext and the encryption key.
+`Decrypt` takes the ciphertext and the key and returns the plaintext bytes.
